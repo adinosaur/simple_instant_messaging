@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# Gedit tmp file
+*.~
+
+# make
+*.make

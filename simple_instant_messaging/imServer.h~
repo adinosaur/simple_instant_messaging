@@ -1,0 +1,19 @@
+#ifndef IMSERVER_H
+#define IMSERVER_H
+
+class TcpServer {
+    public:
+        TcpServer(int);
+        ~TcpServer();
+        void run();
+        virtual void do_handle();
+    private:
+        void bind_and_listen();
+        void _bind();
+        void _listen();
+
+        int _port;
+        int _listen_fd;
+};
+
+#endif
