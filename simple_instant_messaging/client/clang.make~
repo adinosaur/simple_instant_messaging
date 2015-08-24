@@ -1,2 +1,0 @@
-
-clang++-3.6 --std=c++11 *.cc ../dimp/dimp.cc -o client.out
