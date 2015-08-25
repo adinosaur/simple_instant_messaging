@@ -14,6 +14,8 @@ using namespace std;
 void imClient::do_handle() 
 {
     string content;
+    int id = 0;
+
     if (login()) 
     {
         while(1) 
@@ -26,8 +28,29 @@ void imClient::do_handle()
             int nready = select(_confd + 1, &rset, NULL, NULL, NULL);
             if (FD_ISSET(0, &rset)) 
             {
-                cin >> content;
-                _send_message(0, content);
+                getline(cin, content);
+                if (!content.empty()) {
+                    if (content[0] == '@') 
+                    {
+                        string user_name = content.substr(1);
+                        if (user_name == "all")
+                            id = 0;
+                        else
+                        {
+                            cout << ">>> send message to " << user_name << endl;
+                            if ((id = get_user_id(user_name)) == -1) 
+                            {
+                                cerr << "[ERROR] user: " << user_name << " does not online\n";
+                                id = 0;
+                                continue;
+                            }
+                        }
+                    }
+                    else
+                        _send_message(id, content);
+                }
+                else
+                    cin.clear();
             }
             if (FD_ISSET(_confd, &rset)) 
             {
@@ -107,13 +130,14 @@ int imClient::get_user_id(string user_name)
     request.set_name("DIMP");                               //设置协议名
     request.set_version(1);                                 //设置协议版本
     request.set_status(DimpPackage::DIMP_STATUS_CHECK_UID); //设置状态
+    request.set_body(user_name);                            //设置查询用户名
     request.get_all(send_buf);
 
     write(_confd, send_buf, request.get_package_len());
     recv_bytes = read(_confd, recv_buf, sizeof(recv_buf));
 
     DimpPackage response(recv_buf);
-    if (response.get_status() != DimpPackage::DIMP_STATUS_ERROR)
+    if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
         return -1;
     else
         return stoul(response.get_body());

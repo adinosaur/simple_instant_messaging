@@ -60,6 +60,7 @@ bool IMServer::do_handle(int confd)
     DimpPackage request;
     DimpPackage response;
     size_t read_bytes = 0;
+    int user_id = get_id_from_confd(confd);
 
     if ((read_bytes = read(confd, recv_buf, sizeof(recv_buf))) > 0) 
     {
@@ -85,7 +86,7 @@ bool IMServer::do_handle(int confd)
     {
         cerr << "[ERROR] read error\n";
         // logout when error
-        del_user(request.get_from());
+        del_user(user_id);
         print_all_user(cout);
     }
     return read_bytes != 0 && response.get_status() != DimpPackage::DIMP_STATUS_ERROR;
@@ -106,7 +107,7 @@ bool IMServer::add_user(std::string user_name, int confd)
 
 bool IMServer::del_user(unsigned int user_id)
 {
-    if (has_id(user_id))
+    if (!has_id(user_id))
         return false;
     else 
     {
@@ -214,7 +215,7 @@ void IMServer::send_message(unsigned int from, unsigned int to, std::string msg)
     response.set_status(DimpPackage::DIMP_STATUS_DATA);
     response.set_from(from);
     response.set_to(to);
-    response.set_body("[@" + from_user_name + "]: " + msg);
+    response.set_body("[$" + from_user_name + "]: " + msg);
     //cout << "----------------------------------------------" << endl;
     //response.print();
     //cout << "----------------------------------------------" << endl;
@@ -225,5 +226,9 @@ void IMServer::send_message(unsigned int from, unsigned int to, std::string msg)
         for (auto confd : _fd_set)
             if (confd != _listen_fd && confd != get_confd_from_id(from))
                 write(confd, send_buf, response.get_package_len());
+    }
+    else
+    {
+        write(get_confd_from_id(to), send_buf, response.get_package_len());
     }
 }
