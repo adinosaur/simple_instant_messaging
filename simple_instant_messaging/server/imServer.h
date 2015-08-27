@@ -34,6 +34,8 @@ class IMServer : public TcpServer
         
         void print_all_user(std::ostream&);
     private:
+        void _send_message(unsigned int, unsigned int, std::string);
+        
         std::default_random_engine dre;
         std::unordered_map<std::string, unsigned int> _user_to_id;
         std::unordered_map<unsigned int, unsigned int> _id_to_confd;

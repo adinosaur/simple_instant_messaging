@@ -58,6 +58,7 @@ class DimpPackage
         static const unsigned short DIMP_STATUS_LOGOUT = 4;
         static const unsigned short DIMP_STATUS_REPLY = 5;
         static const unsigned short DIMP_STATUS_CHECK_UID = 6;
+        static const unsigned short DIMP_STATUS_GET_ALL_USERS = 7;
         
         DimpPackage() = default;
         explicit DimpPackage(unsigned char* head);
