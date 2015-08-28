@@ -109,7 +109,7 @@ bool imClient::logout()
     recv_bytes = read(_confd, recv_buf, sizeof(recv_buf));
 
     DimpPackage response(recv_buf);
-    if (response.get_status() != DimpPackage::DIMP_STATUS_ERROR)
+    if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
         return false;
     else
         return true;
@@ -222,7 +222,7 @@ int imClient::get_user_id(string user_name)
     //if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
     //    return stoul(response.get_body());
     //else
-    return stoul(response.get_body());
+    return stoi(response.get_body());
 }
 
 vector<string> imClient::get_all_users()

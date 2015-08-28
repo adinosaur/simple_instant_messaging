@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "dimp.h"
+#include "../include/dimp/dimp.h"
 
 unsigned char dimp_package[] = {
         'D', 'I', 'M', 'P',     //protocal name

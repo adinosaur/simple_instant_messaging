@@ -11,6 +11,7 @@ using namespace std;
 TcpClient::TcpClient(int port, string ip_addr):_port(port), _ip_addr(ip_addr) 
 {
     _confd = socket(AF_INET, SOCK_STREAM, 0);
+    _connect();
 }
 
 TcpClient::~TcpClient() 
@@ -30,7 +31,7 @@ void TcpClient::_connect()
 
 void TcpClient::run() 
 {
-    _connect();
+    //_connect();
     do_handle();
 }
 

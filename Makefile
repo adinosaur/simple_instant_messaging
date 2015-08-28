@@ -34,6 +34,14 @@ all: ./build/client.o ./build/server.o ./build/tcpClient.o ./build/tcpServer.o .
 ./build/dimp.o: ./include/dimp/dimp.cc
 	$(CC) --std=c++11 -Wall -g -c ./include/dimp/dimp.cc -o ./build/dimp.o
 
+test_dimp: ./test/dimp_unittest.cc ./build/dimp.o
+	g++ --std=c++11 -Wall -g -c ./test/dimp_unittest.cc -o ./build/dimp_unittest.o
+	$(CC) --std=c++11 -Wall -g ./build/dimp.o ./build/dimp_unittest.o -o ./test/dimp_unittest.out -lgtest -lpthread
+
+test_imClient: ./build/tcpClient.o ./build/imClient.o ./build/dimp.o
+	g++ --std=c++11 -Wall -g -c ./test/imClient_unittest.cc -o ./build/imClient_unittest.o
+	$(CC) --std=c++11 -Wall -g ./build/imClient_unittest.o ./build/tcpClient.o ./build/imClient.o ./build/dimp.o -o ./test/imClient_unittest.out -lgtest -lpthread
+
 clean:
 	rm ./build/*
 
