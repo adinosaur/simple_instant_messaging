@@ -1,14 +1,14 @@
 #ifndef IMCLIENT_H
 #define IMCLIENT_H
-#include "tcpClient.h"
 #include <string>
 #include <vector>
+#include "../../include/tcpClient/tcpClient.h"
 
-class imClient : public tcpClient 
+class imClient : public TcpClient 
 {
     public:
         imClient(int port, std::string ip_addr, std::string user_name):
-            tcpClient(port, ip_addr), _user_name(user_name) { }
+            TcpClient(port, ip_addr), _user_name(user_name) { }
 
         bool login();
         bool logout();

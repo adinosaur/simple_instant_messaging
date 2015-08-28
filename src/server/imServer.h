@@ -1,11 +1,14 @@
 #ifndef IMSERVER_H
 #define IMSERVER_H
-#include "tcpServer.h"
-#include "../dimp/dimp.h"
-#include <unordered_map>
-#include <iostream>
+
 #include <random>
 #include <string>
+#include <iostream>
+#include <unordered_map>
+
+#include "../../include/dimp/dimp.h"
+#include "../../include/tcpServer/tcpServer.h"
+
 
 class IMServer : public TcpServer 
 {

@@ -1,12 +1,12 @@
-#ifndef TCPCLIENT_H
-#define TCPCLIENT_H
+#ifndef TcpClient_H
+#define TcpClient_H
 #include <string>
 
-class tcpClient 
+class TcpClient 
 {
     public:
-        tcpClient(int, std::string);
-        ~tcpClient();
+        TcpClient(int, std::string);
+        virtual ~TcpClient();
         void run();
         virtual void do_handle();
     protected:

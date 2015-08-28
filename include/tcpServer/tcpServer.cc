@@ -1,4 +1,4 @@
-#include "imServer.h"
+#include "tcpServer.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -70,6 +70,9 @@ void TcpServer::run()
             cout << ", from " << client_addr;
             cout << ", port " << ntohs(saddr.sin_port);
             cout << ", fd:" << confd << endl;
+            
+            if (--nready == 0)
+                continue;
         }
         for (auto confd : _fd_set) 
         {

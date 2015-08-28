@@ -1,5 +1,3 @@
-#include "imClient.h"
-#include "../dimp/dimp.h"
 #include "string.h"
 #include <unistd.h>
 #include <sys/select.h>
@@ -8,6 +6,9 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+
+#include "imClient.h"
+#include "../../include/dimp/dimp.h"
 
 using namespace std;
 
@@ -26,7 +27,7 @@ void imClient::do_handle()
             FD_SET(0, &rset);
             FD_SET(_confd, &rset);
 
-            int nready = select(_confd + 1, &rset, NULL, NULL, NULL);
+            select(_confd + 1, &rset, NULL, NULL, NULL);
             if (FD_ISSET(0, &rset)) 
             {
                 getline(cin, content);
@@ -69,7 +70,7 @@ bool imClient::login()
 {
     unsigned char send_buf[BUFSIZE];
     unsigned char recv_buf[BUFSIZE];
-    size_t recv_bytes;
+    ssize_t recv_bytes;
 
     DimpPackage request;
     request.set_name("DIMP");                           //设置协议名
@@ -95,7 +96,7 @@ bool imClient::logout()
 {
     unsigned char send_buf[BUFSIZE];
     unsigned char recv_buf[BUFSIZE];
-    size_t recv_bytes;
+    ssize_t recv_bytes;
 
     DimpPackage request;
     request.set_name("DIMP");                           //设置协议名
@@ -129,7 +130,7 @@ void imClient::parse(std::string content)
             else
             {
                 id = get_user_id(user_name);
-                if (id == 0)
+                if (id == 0) 
                     cout << "[INFO] user: " << user_name << " does not online." << endl;
                 else
                     cout << ">>> send message to " << user_name << endl;
@@ -204,7 +205,7 @@ int imClient::get_user_id(string user_name)
 {
     unsigned char send_buf[BUFSIZE];
     unsigned char recv_buf[BUFSIZE];
-    size_t recv_bytes;
+    ssize_t recv_bytes;
 
     DimpPackage request;
     request.set_name("DIMP");                               //设置协议名
@@ -219,7 +220,7 @@ int imClient::get_user_id(string user_name)
     DimpPackage response(recv_buf);
     //response.print();
     //if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
-    //   return 0;
+    //    return stoul(response.get_body());
     //else
     return stoul(response.get_body());
 }

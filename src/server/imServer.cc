@@ -1,7 +1,7 @@
-#include "imServer.h"
-#include "../dimp/dimp.h"
 #include <unistd.h>
 #include <string.h>
+
+#include "imServer.h"
 
 using namespace std;
 
@@ -87,7 +87,7 @@ bool IMServer::do_handle(int confd)
         cerr << "[ERROR] read error\n";
         del_user(user_id);
     }
-    return read_bytes > 0 && response.get_status() != DimpPackage::DIMP_STATUS_ERROR;
+    return read_bytes > 0;
 }
 
 bool IMServer::add_user(std::string user_name, int confd)
@@ -172,8 +172,7 @@ DimpPackage IMServer::handle_request(DimpPackage request, int confd)
                 } 
                 else
                 {
-                    response.set_status(DimpPackage::DIMP_STATUS_REPLY);
-                    //response.set_status(DimpPackage::DIMP_STATUS_ERROR);
+                    response.set_status(DimpPackage::DIMP_STATUS_ERROR);
                     response.set_body("0");
                 }
                 break;

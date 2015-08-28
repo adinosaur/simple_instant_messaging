@@ -8,17 +8,17 @@
 #include <iostream>
 using namespace std;
 
-tcpClient::tcpClient(int port, string ip_addr):_port(port), _ip_addr(ip_addr) 
+TcpClient::TcpClient(int port, string ip_addr):_port(port), _ip_addr(ip_addr) 
 {
     _confd = socket(AF_INET, SOCK_STREAM, 0);
 }
 
-tcpClient::~tcpClient() 
+TcpClient::~TcpClient() 
 {
     close(_confd);
 }
 
-void tcpClient::_connect() 
+void TcpClient::_connect() 
 {
     struct sockaddr_in saddr;
     bzero(&saddr, sizeof(saddr));
@@ -28,13 +28,13 @@ void tcpClient::_connect()
     connect(_confd, (struct sockaddr*)&saddr, sizeof(saddr));
 }
 
-void tcpClient::run() 
+void TcpClient::run() 
 {
     _connect();
     do_handle();
 }
 
-void tcpClient::do_handle() 
+void TcpClient::do_handle() 
 {
-    cout << "[INFO] tcpClient::do_handle" << endl;
+    cout << "[INFO] TcpClient::do_handle" << endl;
 }
