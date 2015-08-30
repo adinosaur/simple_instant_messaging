@@ -66,53 +66,47 @@ void imClient::do_handle()
     }
 }
 
-bool imClient::login() 
+DimpPackage imClient::get_response(unsigned short status, int to, std::string body)
 {
     unsigned char send_buf[BUFSIZE];
     unsigned char recv_buf[BUFSIZE];
     ssize_t recv_bytes;
-
+    
     DimpPackage request;
-    request.set_name("DIMP");                           //设置协议名
-    request.set_version(1);                             //设置协议版本
-    request.set_status(DimpPackage::DIMP_STATUS_LOGIN); //设置状态
-    request.set_body(_user_name);                       //设置body为用户名
+    request.set_name("DIMP");
+    request.set_version(1);
+    request.set_status(status);
+    request.set_from(_user_id);
+    request.set_to(to);
+    if (!body.empty())
+        request.set_body(body);
+
     request.get_all(send_buf);
-
-    write(_confd, send_buf, request.get_package_len());
-    recv_bytes = read(_confd, recv_buf, sizeof(recv_buf));
-
+    
+    if(write(_confd, send_buf, request.get_package_len()) < 0)
+        cerr << "[ERROR] write error\n";
+    
+    if ((recv_bytes = read(_confd, recv_buf, sizeof(recv_buf))) < 0)
+        cerr << "[ERROR] read error\n";
+    
     DimpPackage response(recv_buf);
     if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
-        return false;
-    else 
-    {
-        _user_id = stoul(response.get_body());
-        return true;
-    }
+        cerr << "[ERROR] reply DIMP_STATUS_ERROR\n";
+
+    return response;
+}
+
+bool imClient::login() 
+{
+    DimpPackage response = get_response(DimpPackage::DIMP_STATUS_LOGIN, 0, _user_name);
+    _user_id = stoul(response.get_body());
+    return response.get_status() != DimpPackage::DIMP_STATUS_ERROR;
 }
 
 bool imClient::logout() 
 {
-    unsigned char send_buf[BUFSIZE];
-    unsigned char recv_buf[BUFSIZE];
-    ssize_t recv_bytes;
-
-    DimpPackage request;
-    request.set_name("DIMP");                           //设置协议名
-    request.set_version(1);                             //设置协议版本
-    request.set_status(DimpPackage::DIMP_STATUS_LOGOUT);//设置状态
-    request.set_from(_user_id);                         //设置发送者id
-    request.get_all(send_buf);
-
-    write(_confd, send_buf, request.get_package_len());
-    recv_bytes = read(_confd, recv_buf, sizeof(recv_buf));
-
-    DimpPackage response(recv_buf);
-    if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
-        return false;
-    else
-        return true;
+    DimpPackage response = get_response(DimpPackage::DIMP_STATUS_LOGOUT, 0, "");
+    return response.get_status() != DimpPackage::DIMP_STATUS_ERROR;
 }
 
 void imClient::parse(std::string content)
@@ -203,101 +197,28 @@ void imClient::print_active_users(const vector<string>& users_list)
 
 int imClient::get_user_id(string user_name) 
 {
-    unsigned char send_buf[BUFSIZE];
-    unsigned char recv_buf[BUFSIZE];
-    ssize_t recv_bytes;
-
-    DimpPackage request;
-    request.set_name("DIMP");                               //设置协议名
-    request.set_version(1);                                 //设置协议版本
-    request.set_status(DimpPackage::DIMP_STATUS_CHECK_UID); //设置状态
-    request.set_body(user_name);                            //设置查询用户名
-    request.get_all(send_buf);
-
-    write(_confd, send_buf, request.get_package_len());
-    recv_bytes = read(_confd, recv_buf, sizeof(recv_buf));
-
-    DimpPackage response(recv_buf);
-    //response.print();
-    //if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
-    //    return stoul(response.get_body());
-    //else
+    DimpPackage response = get_response(DimpPackage::DIMP_STATUS_CHECK_UID, 0, user_name);
     return stoi(response.get_body());
 }
 
 vector<string> imClient::get_all_users()
 {
-    unsigned char send_buf[BUFSIZE];
-    unsigned char recv_buf[BUFSIZE];
     const int USER_NAME_BUF_LEN = 32;
     char user_name_buf[USER_NAME_BUF_LEN];
     vector<string> users_list;
-    size_t recv_bytes;
-
-    DimpPackage request;
-    request.set_name("DIMP");                                   //设置协议名
-    request.set_version(1);                                     //设置协议版本
-    request.set_status(DimpPackage::DIMP_STATUS_GET_ALL_USERS); //设置状态
-    request.get_all(send_buf);
-
-    write(_confd, send_buf, request.get_package_len());
-    recv_bytes = read(_confd, recv_buf, sizeof(recv_buf));
-
-    DimpPackage response(recv_buf);
-    if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
-        return std::move(users_list);
-    else
+    
+    DimpPackage response = get_response(DimpPackage::DIMP_STATUS_GET_ALL_USERS, 0, "");
+    if (response.get_status() != DimpPackage::DIMP_STATUS_ERROR)
     {
         stringstream ss(response.get_body());
         while (ss.getline(user_name_buf, USER_NAME_BUF_LEN))
             users_list.push_back(user_name_buf);
         return std::move(users_list);
     }
+    return std::move(users_list);
 }
 
-void imClient::send_message(std::string user_name, std::string msg) 
+DimpPackage imClient::_send_message(unsigned int uid, std::string msg) 
 {
-    int uid;
-
-    if ((uid = get_user_id(user_name) == -1)) 
-    {
-        cerr << "[ERROR] wrong user name\n";
-        return;
-    } 
-    else 
-    {
-        _send_message(uid, msg);
-    }
-}
-
-void imClient::_send_message(unsigned int uid, std::string msg) 
-{
-    unsigned char send_buf[BUFSIZE];
-    unsigned char recv_buf[BUFSIZE];
-    int recv_bytes;
-
-    DimpPackage request;
-    request.set_name("DIMP");                               //设置协议名
-    request.set_version(1);                                 //设置协议版本
-    request.set_status(DimpPackage::DIMP_STATUS_DATA);      //设置状态
-    request.set_from(_user_id);                             //设置发送者id
-    request.set_to(uid);                                    //设置接收者id
-    request.set_body(msg);
-    request.get_all(send_buf);
-
-    if(write(_confd, send_buf, request.get_package_len()) < 0)
-    {
-        cerr << "[ERROR] write error\n";
-        return;
-    }
-    
-    if ((recv_bytes = read(_confd, recv_buf, sizeof(recv_buf))) < 0)
-    {
-        cerr << "[ERROR] read error\n";
-        return;
-    }
-
-    DimpPackage response(recv_buf);
-    if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
-        cerr << "[ERROR] send error...\n";
+    return get_response(DimpPackage::DIMP_STATUS_DATA, uid, msg);
 }

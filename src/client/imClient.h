@@ -4,6 +4,8 @@
 #include <vector>
 #include "../../include/tcpClient/tcpClient.h"
 
+class DimpPackage;
+
 class imClient : public TcpClient 
 {
     public:
@@ -20,10 +22,9 @@ class imClient : public TcpClient
         std::vector<std::string> get_all_users();
         void print_active_users(const std::vector<std::string>&);
 
-        void send_message(std::string, std::string);
+        DimpPackage get_response(unsigned short, int, std::string);
+        DimpPackage _send_message(unsigned int, std::string);
     private:
-        void _send_message(unsigned int, std::string);
-
         std::string _user_name;
         unsigned int _user_id;
 };

@@ -38,9 +38,12 @@ test_dimp: ./test/dimp_unittest.cc ./build/dimp.o
 	g++ --std=c++11 -Wall -g -c ./test/dimp_unittest.cc -o ./build/dimp_unittest.o
 	$(CC) --std=c++11 -Wall -g ./build/dimp.o ./build/dimp_unittest.o -o ./test/dimp_unittest.out -lgtest -lpthread
 
-test_imClient: ./build/tcpClient.o ./build/imClient.o ./build/dimp.o
+unit_test_imClient: ./build/tcpClient.o ./build/imClient.o ./build/dimp.o
 	g++ --std=c++11 -Wall -g -c ./test/imClient_unittest.cc -o ./build/imClient_unittest.o
 	$(CC) --std=c++11 -Wall -g ./build/imClient_unittest.o ./build/tcpClient.o ./build/imClient.o ./build/dimp.o -o ./test/imClient_unittest.out -lgtest -lpthread
+
+pressure_test_imServer: ./build/tcpClient.o ./build/imClient.o ./build/dimp.o
+	$(CC) --std=c++11 -Wall -g ./build/imClient.o ./build/tcpClient.o ./build/dimp.o ./test/imServer_pressure_test.cc -o ./test/pressure_test
 
 clean:
 	rm ./build/*
