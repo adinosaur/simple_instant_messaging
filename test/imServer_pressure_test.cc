@@ -9,6 +9,7 @@
 #include "../include/dimp/dimp.h"
 #include "../src/client/imClient.h"
 
+const unsigned int BUFSIZE = 128;
 const unsigned int FORK_SIZE = 10;
 const unsigned short PORT = 6666;
 const char* IP = "127.0.0.1";
@@ -23,7 +24,13 @@ int main()
         if (pid == 0)
         {
             imClient im_client(PORT, IP, std::to_string(r));
-            im_client._send_message(0, "test message...\n");
+            DimpPackage response = im_client._send_message(0, "test message...\n");
+            while (1)
+            {
+                unsigned char buf[BUFSIZE];
+                ssize_t read_bytes = im_client.read_from_socket(buf, sizeof(buf));
+                write(1, buf, read_bytes);
+            }
             exit(0);
         }
         else if (pid > 0)

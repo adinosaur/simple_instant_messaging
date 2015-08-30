@@ -18,9 +18,11 @@ class imClient : public TcpClient
         void parse(std::string);
         void do_handle();
 
-        int get_user_id(std::string);
+        unsigned int get_user_id(std::string);
         std::vector<std::string> get_all_users();
         void print_active_users(const std::vector<std::string>&);
+
+        ssize_t read_from_socket(unsigned char*, size_t);
 
         DimpPackage get_response(unsigned short, int, std::string);
         DimpPackage _send_message(unsigned int, std::string);

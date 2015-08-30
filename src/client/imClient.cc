@@ -39,17 +39,9 @@ void imClient::do_handle()
             if (FD_ISSET(_confd, &rset)) 
             {
                 unsigned char recv_buf[BUFSIZE];
-                int recv_bytes = read(_confd, recv_buf, sizeof(recv_buf));
-                if(recv_bytes < 0) 
-                {
-                    cerr << "[ERROR] read error...\n";
+                ssize_t recv_bytes = read_from_socket(recv_buf, sizeof(recv_buf));
+                if(recv_bytes <= 0) 
                     return;
-                }
-                else if (recv_bytes == 0) 
-                {
-                    cerr << "[ERROR] IM server close...\n";
-                    return;
-                }
                 else
                 {
                     DimpPackage response(recv_buf);
@@ -64,6 +56,16 @@ void imClient::do_handle()
     {
         cerr << "[ERROR] user_name already exist: " << _user_name << endl;
     }
+}
+
+ssize_t imClient::read_from_socket(unsigned char* buf, size_t count)
+{
+    ssize_t recv_bytes = read(_confd, buf, count);
+    if(recv_bytes < 0) 
+        cerr << "[ERROR] read error...\n";
+    else if (recv_bytes == 0) 
+        cerr << "[ERROR] IM server close...\n";
+    return recv_bytes;
 }
 
 DimpPackage imClient::get_response(unsigned short status, int to, std::string body)
@@ -86,8 +88,7 @@ DimpPackage imClient::get_response(unsigned short status, int to, std::string bo
     if(write(_confd, send_buf, request.get_package_len()) < 0)
         cerr << "[ERROR] write error\n";
     
-    if ((recv_bytes = read(_confd, recv_buf, sizeof(recv_buf))) < 0)
-        cerr << "[ERROR] read error\n";
+    recv_bytes = read_from_socket(recv_buf, sizeof(recv_buf));
     
     DimpPackage response(recv_buf);
     if (response.get_status() == DimpPackage::DIMP_STATUS_ERROR)
@@ -111,7 +112,7 @@ bool imClient::logout()
 
 void imClient::parse(std::string content)
 {
-    static int id = 0;
+    static unsigned int id = 0;
     vector<string> users_list;
     string user_name;
 
@@ -195,10 +196,10 @@ void imClient::print_active_users(const vector<string>& users_list)
     }
 }
 
-int imClient::get_user_id(string user_name) 
+unsigned int imClient::get_user_id(string user_name) 
 {
     DimpPackage response = get_response(DimpPackage::DIMP_STATUS_CHECK_UID, 0, user_name);
-    return stoi(response.get_body());
+    return stoul(response.get_body());
 }
 
 vector<string> imClient::get_all_users()

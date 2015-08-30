@@ -47,11 +47,16 @@ TEST(IMCLIENT, LOGOUT)
 
 TEST(IMCLIENT, GET_USER_ID)
 {
+    const int BUFSIZE = 128;
+    unsigned char buf[BUFSIZE];
     imClient im_client1(port, ip, "dinosaur");
     im_client1.login();
 
     imClient im_client2(port, ip, "wumanshuo");
     im_client2.login();
+
+    // im_client1 will recv a string "[INFO] wumanshuo join..."
+    im_client1.read_from_socket(buf, sizeof(buf));
 
     // "wumanshuo" online, get_user_id return non 0.
     EXPECT_NE(0, im_client1.get_user_id("wumanshuo"));

@@ -142,6 +142,7 @@ DimpPackage IMServer::handle_request(DimpPackage request, int confd)
                 if (user_name.empty() || !add_user(user_name, confd)) 
                 {
                     response.set_status(DimpPackage::DIMP_STATUS_ERROR);
+                    response.set_body("0");
                     cerr << "[ERROR] user_name already exist: " << user_name << endl;
                 } 
                 else 
